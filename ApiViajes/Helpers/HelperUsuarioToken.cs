@@ -14,7 +14,7 @@ namespace ApiViajes.Helpers
             this.contextAccessor = contextAccessor;
         }
 
-        public UsuarioCompletoViewModel GetUsuario()
+        public UsuarioModel GetUsuario()
         {
             Claim claim =
                 contextAccessor.HttpContext
@@ -22,8 +22,8 @@ namespace ApiViajes.Helpers
             string json = claim.Value;
             string jsonUsuario =
                 HelperCryptography.DecryptString(json);
-            UsuarioCompletoViewModel model = JsonConvert
-                .DeserializeObject<UsuarioCompletoViewModel>(jsonUsuario);
+            UsuarioModel model = JsonConvert
+                .DeserializeObject<UsuarioModel>(jsonUsuario);
             return model;
         }
     }

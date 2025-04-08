@@ -9,7 +9,7 @@ namespace ApiViajes.Data
         public ViajesContext(DbContextOptions<ViajesContext>
             options) : base(options) { }
 
-        public DbSet<UsuarioCompletoView> Usuarios { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Lugar> Lugares { get; set; }
         public DbSet<LugarFavorito> LugaresFavoritos { get; set; }
         public DbSet<Comentario> Comentarios { get; set; }

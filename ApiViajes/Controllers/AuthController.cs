@@ -28,7 +28,7 @@ namespace ApiViajes.Controllers
         [Route("[action]")]
         public async Task<ActionResult>Login(LoginModel model)
         {
-            UsuarioCompletoView usuario = await
+            Usuario usuario = await
                 this.repo.LogInUsuarioAsync(model.Email
                 , model.Clave);
             if (usuario == null)
@@ -41,19 +41,12 @@ namespace ApiViajes.Controllers
                     new SigningCredentials
                     (this.helper.GetKeyToken(),
                     SecurityAlgorithms.HmacSha256);
-                UsuarioCompletoViewModel modelUser = new UsuarioCompletoViewModel();
+                UsuarioModel modelUser = new UsuarioModel();
                 modelUser.IdUsuario = usuario.IdUsuario;
                 modelUser.Nombre = usuario.Nombre;
-                modelUser.Email = usuario.Email;
-                modelUser.Edad = usuario.Edad;
-                modelUser.Nacionalidad = usuario.Nacionalidad;
+                modelUser.Correo = usuario.Correo;  
                 modelUser.PreferenciaViaje = usuario.PreferenciaViaje;
-                modelUser.Imagen = usuario.Imagen;
-                modelUser.FechaRegistro = usuario.FechaRegistro;
-                modelUser.CorreoLogin = usuario.CorreoLogin;
-                modelUser.Clave = usuario.Clave;
-                modelUser.ConfirmarClave = usuario.ConfirmarClave;
-                modelUser.AvatarUrl = usuario.AvatarUrl;
+                modelUser.AvatarUrl = usuario.AvatarUrl; 
                 string jsonUsuario =
                     JsonConvert.SerializeObject(modelUser);
                 string jsonCrifado =

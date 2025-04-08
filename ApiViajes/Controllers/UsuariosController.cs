@@ -24,14 +24,14 @@ namespace ApiViajes.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UsuarioCompletoView>>> GetUsuarios()
+        public async Task<ActionResult<List<Usuario>>> GetUsuarios()
         {
             return await this.repo.GetUsuariosAsync();
         }
 
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<ActionResult<UsuarioCompletoView>>FindEmpleado(int id)
+        public async Task<ActionResult<Usuario>>FindEmpleado(int id)
         {
             return await this.repo.FindUsuarioAsync(id);
         }
@@ -39,9 +39,9 @@ namespace ApiViajes.Controllers
         [Authorize]
         [HttpGet]
         [Route("[action]")]
-        public async Task<ActionResult<UsuarioCompletoViewModel>>Perfil()
+        public async Task<ActionResult<UsuarioModel>>Perfil()
         {
-            UsuarioCompletoViewModel model = this.helper.GetUsuario();
+            UsuarioModel model = this.helper.GetUsuario();
             return model;
         }   
     }

@@ -13,12 +13,12 @@ namespace ApiViajes.Repositories
             this.context = context;
         }
 
-        public async Task<List<UsuarioCompletoView>> GetUsuariosAsync()
+        public async Task<List<Usuario>> GetUsuariosAsync()
         {
             return await this.context.Usuarios.ToListAsync();
         }
 
-        public async Task<UsuarioCompletoView> LogInUsuarioAsync(string nombre, string clave)
+        public async Task<Usuario> LogInUsuarioAsync(string nombre, string clave)
         {
             return await this.context.Usuarios
                 .Where(x => x.Nombre == nombre && x.Clave == clave)
@@ -26,7 +26,7 @@ namespace ApiViajes.Repositories
         }
 
 
-        public async Task<UsuarioCompletoView>FindUsuarioAsync(int idUsuario)
+        public async Task<Usuario> FindUsuarioAsync(int idUsuario)
         {
             return await this.context.Usuarios
                 .FirstOrDefaultAsync(z => z.IdUsuario == idUsuario);
