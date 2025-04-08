@@ -87,15 +87,28 @@ namespace ApiViajes.Repositories
 
         public async Task DeleteLugarAsync(int idLugar)
         {
+            // Buscar el lugar
             Lugar lugar = await _context.Lugares.FirstOrDefaultAsync(l => l.IdLugar == idLugar);
 
             if (lugar != null)
             {
+                // Eliminar los comentarios asociados a este lugar
+                var comentarios = await _context.Comentarios
+                    .Where(c => c.IdLugar == idLugar)
+                    .ToListAsync();
+
+                if (comentarios.Any())
+                {
+                    _context.Comentarios.RemoveRange(comentarios);
+                }
+
+                // Eliminar el lugar
                 _context.Lugares.Remove(lugar);
+
+                // Guardar cambios en la base de datos
                 await _context.SaveChangesAsync();
             }
         }
-
 
         // Obtener lugares favoritos de un usuario
         public async Task<List<LugarFavorito>> GetFavoritosLugarAsync(int idUsuario)

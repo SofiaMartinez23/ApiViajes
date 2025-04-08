@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using ApiViajes.Models;
 
 namespace ViajesMvcNetCore.Models
 {
@@ -21,6 +22,9 @@ namespace ViajesMvcNetCore.Models
 
         [Column("FECHA_ENVIO")]
         public DateTime FechaEnvio { get; set; }
+
+        public virtual Usuario UsuarioRemitente { get; set; }
+        public virtual Usuario UsuarioDestinatario { get; set; }
 
     }
 }

@@ -1,5 +1,4 @@
-﻿
-using ApiViajes.Models;
+﻿using ApiViajes.Models;
 using Newtonsoft.Json;
 using System.Security.Claims;
 
@@ -16,14 +15,17 @@ namespace ApiViajes.Helpers
 
         public UsuarioModel GetUsuario()
         {
-            Claim claim =
-                contextAccessor.HttpContext
+            Claim claim = contextAccessor.HttpContext
                 .User.FindFirst(x => x.Type == "UserData");
+
+            if (claim == null)
+            {
+                throw new UnauthorizedAccessException("No se encontró el claim 'UserData'.");
+            }
+
             string json = claim.Value;
-            string jsonUsuario =
-                HelperCryptography.DecryptString(json);
-            UsuarioModel model = JsonConvert
-                .DeserializeObject<UsuarioModel>(jsonUsuario);
+            string jsonUsuario = HelperCryptography.DecryptString(json);
+            UsuarioModel model = JsonConvert.DeserializeObject<UsuarioModel>(jsonUsuario);
             return model;
         }
     }
