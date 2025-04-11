@@ -1,4 +1,4 @@
-﻿using ApiViajes.Models;
+﻿using NugetViajesSMG.Models;
 using Newtonsoft.Json;
 using System.Security.Claims;
 

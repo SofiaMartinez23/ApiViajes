@@ -1,5 +1,5 @@
 ﻿using ApiViajes.Helpers;
-using ApiViajes.Models;
+using NugetViajesSMG.Models;
 using ApiViajes.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +14,10 @@ namespace ApiViajes.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private RepositoryViaje repo;
+        private RepositoryAuth repo;
         private HelperActionServicesOAuth helper;
 
-        public AuthController(RepositoryViaje repo
+        public AuthController(RepositoryAuth repo
             , HelperActionServicesOAuth helper)
         {
             this.repo = repo;
@@ -26,51 +26,56 @@ namespace ApiViajes.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public async Task<ActionResult>Login(LoginModel model)
+        public async Task<ActionResult> Login(LoginModel model)
         {
-            Usuario usuario = await
-                this.repo.LogInUsuarioAsync(model.Email
-                , model.Clave);
+            UsuarioCompletoView usuario = await this.repo.LogInUsuarioAsync(model.Email, model.Clave);
+
             if (usuario == null)
             {
                 return Unauthorized();
             }
-            else
+
+            SigningCredentials credentials = new SigningCredentials(
+                this.helper.GetKeyToken(),
+                SecurityAlgorithms.HmacSha256
+            );
+
+            UsuarioModel modelUser = new UsuarioModel
             {
-                SigningCredentials credentials =
-                    new SigningCredentials
-                    (this.helper.GetKeyToken(),
-                    SecurityAlgorithms.HmacSha256);
-                UsuarioModel modelUser = new UsuarioModel();
-                modelUser.IdUsuario = usuario.IdUsuario;
-                modelUser.Nombre = usuario.Nombre;
-                modelUser.Correo = usuario.Correo;  
-                modelUser.PreferenciaViaje = usuario.PreferenciaViaje;
-                modelUser.AvatarUrl = usuario.AvatarUrl; 
-                string jsonUsuario =
-                    JsonConvert.SerializeObject(modelUser);
-                string jsonCrifado =
-                    HelperCryptography.EncryptString(jsonUsuario);
-                Claim[] informacion = new[]
-                {
-                    new Claim("UserData", jsonCrifado)
-                };
-                JwtSecurityToken token =
-                    new JwtSecurityToken(
-                        claims: informacion,
-                        issuer: this.helper.Issuer,
-                        audience: this.helper.Audience,
-                        signingCredentials: credentials,
-                        expires: DateTime.UtcNow.AddMinutes(20),
-                        notBefore: DateTime.UtcNow
-                        );
-                return Ok(new
-                {
-                    response =
-                    new JwtSecurityTokenHandler()
-                    .WriteToken(token)
-                });
-            }
+                IdUsuario = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                Email = usuario.Email,
+                Edad = usuario.Edad,
+                Nacionalidad = usuario.Nacionalidad,
+                PreferenciaViaje = usuario.PreferenciaViaje,
+                AvatarUrl = usuario.AvatarUrl,
+                Clave = usuario.Clave,              
+                ConfirmarClave = usuario.ConfirmarClave       
+            };
+
+            string jsonUsuario = JsonConvert.SerializeObject(modelUser);
+            string jsonCifrado = HelperCryptography.EncryptString(jsonUsuario);
+
+            Claim[] informacion = new[]
+            {
+                new Claim("UserData", jsonCifrado)
+            };
+
+            JwtSecurityToken token = new JwtSecurityToken(
+                claims: informacion,
+                issuer: this.helper.Issuer,
+                audience: this.helper.Audience,
+                signingCredentials: credentials,
+                expires: DateTime.UtcNow.AddMinutes(20),
+                notBefore: DateTime.UtcNow
+            );
+
+            return Ok(new
+            {
+                response = new JwtSecurityTokenHandler().WriteToken(token)
+            });
         }
+
     }
 }
+

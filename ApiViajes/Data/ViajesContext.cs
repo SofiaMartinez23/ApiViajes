@@ -1,6 +1,5 @@
-﻿using ApiViajes.Models;
-using Microsoft.EntityFrameworkCore;
-using ViajesMvcNetCore.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using NugetViajesSMG.Models;
 
 namespace ApiViajes.Data
 {
@@ -25,15 +24,15 @@ namespace ApiViajes.Data
 
             modelBuilder.Entity<Chat>()
                 .HasOne(c => c.UsuarioRemitente)
-                .WithMany() // Adjust this based on your Usuario model
+                .WithMany()
                 .HasForeignKey(c => c.IdUsuarioRemitente)
-                .OnDelete(DeleteBehavior.Restrict); // Or your desired delete behavior
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Chat>()
                 .HasOne(c => c.UsuarioDestinatario)
-                .WithMany() // Adjust this based on your Usuario model
+                .WithMany()
                 .HasForeignKey(c => c.IdUsuarioDestinatario)
-                .OnDelete(DeleteBehavior.Restrict); // Or your desired delete behavior
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
 

@@ -6,11 +6,10 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 HelperCryptography.Initialize(builder.Configuration);
-builder.Services.AddHttpContextAccessor(); // Asegúrate de que esto esté aquí.
+builder.Services.AddHttpContextAccessor();
 
 // Registrar HelperUsuarioToken
-builder.Services.AddScoped<HelperUsuarioToken>();  // Aquí registramos HelperUsuarioToken.
-
+builder.Services.AddScoped<HelperUsuarioToken>(); 
 HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration);
 builder.Services.AddSingleton<HelperActionServicesOAuth>(helper);
 builder.Services.AddAuthentication(helper.GetAuthenticateSchema())
@@ -18,8 +17,13 @@ builder.Services.AddAuthentication(helper.GetAuthenticateSchema())
 
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
-builder.Services.AddTransient<RepositoryViaje>();
+builder.Services.AddTransient<RepositoryAuth>();
+builder.Services.AddTransient<RepositoryUsuarios>();
 builder.Services.AddTransient<RepositoryLugar>();
+builder.Services.AddTransient<RepositoryComentarios>();
+builder.Services.AddTransient<RepositoryChats>();
+builder.Services.AddTransient<RepositoryFavoritos>();
+builder.Services.AddTransient<RepositorySeguidos>();
 builder.Services.AddDbContext<ViajesContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

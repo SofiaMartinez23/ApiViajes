@@ -1,32 +1,36 @@
 ﻿using ApiViajes.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using ViajesMvcNetCore.Models;
+using NugetViajesSMG.Models;
 
 namespace ApiViajes.Repositories
 {
     public class RepositoryLugar
     {
-        private readonly ViajesContext _context;
+        private readonly ViajesContext context;
 
         public RepositoryLugar(ViajesContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        // Obtener todos los lugares
         public async Task<List<Lugar>> GetLugaresAsync()
         {
-            return await _context.Lugares.ToListAsync();
+            return await this.context.Lugares.ToListAsync();
+        }
+        public async Task<List<Lugar>> GetLugaresPorUsuarioAsync(int idUsuario)
+        {
+            return await this.context.Lugares
+                .Where(l => l.IdUsuario == idUsuario)
+                .ToListAsync();
         }
 
-        // Buscar un lugar por ID
+
         public async Task<Lugar> FindLugarAsync(int idLugar)
         {
-            return await _context.Lugares.FirstOrDefaultAsync(l => l.IdLugar == idLugar);
+            return await this.context.Lugares.FirstOrDefaultAsync(l => l.IdLugar == idLugar);
         }
 
-        // Buscar lugares por nombre
         public async Task<List<Lugar>> FindLugarByNameAsync(string searchTerm)
         {
             if (string.IsNullOrEmpty(searchTerm))
@@ -36,171 +40,75 @@ namespace ApiViajes.Repositories
 
             string lowerSearchTerm = searchTerm.ToLower();
 
-            return await _context.Lugares
+            return await this.context.Lugares
                 .Where(l => l.Nombre.ToLower().Contains(lowerSearchTerm))
                 .ToListAsync();
         }
 
-        // Obtener lugares por tipo
         public async Task<List<Lugar>> GetLugaresPorTipoAsync(string tipo)
         {
-            return await _context.Lugares
+            return await this.context.Lugares
                 .Where(l => l.Tipo.ToLower() == tipo.ToLower())
                 .ToListAsync();
         }
 
-        // Insertar un nuevo lugar
-        public async Task InsertLugarAsync(string nombre, string descripcion, string ubicacion, string categoria, DateTime horario, string imagen, string tipo)
+        public async Task InsertLugarAsync(int idlugar, string nombre, string descripcion,
+            string ubicacion, string categoria, DateTime horario, string imagen, string tipo, int idusuario)
         {
-            Lugar lugar = new Lugar
-            {
-                Nombre = nombre,
-                Descripcion = descripcion,
-                Ubicacion = ubicacion,
-                Categoria = categoria,
-                Horario = horario,
-                Imagen = imagen,
-                Tipo = tipo
-            };
+            Lugar lugar = new Lugar();
+            lugar.IdLugar = idlugar;
+            lugar.Nombre = nombre;
+            lugar.Descripcion = descripcion;
+            lugar.Ubicacion = ubicacion;
+            lugar.Categoria = categoria;
+            lugar.Horario = horario;
+            lugar.Imagen = imagen;
+            lugar.Tipo = tipo;
+            lugar.IdUsuario = idusuario;
+            
 
-            await _context.Lugares.AddAsync(lugar);
-            await _context.SaveChangesAsync();
+            await this.context.Lugares.AddAsync(lugar);
+            await this.context.SaveChangesAsync();
         }
 
-        public async Task UpdateLugarAsync(int idLugar, string nombre, string descripcion, string ubicacion, string categoria, DateTime horario, string imagen, string tipo)
+        public async Task UpdateLugarAsync(int idlugar, string nombre, string descripcion,
+             string ubicacion, string categoria, DateTime horario, string imagen, string tipo, int idusuario)
         {
-            Lugar lugar = await _context.Lugares.FirstOrDefaultAsync(l => l.IdLugar == idLugar);
+            Lugar lugar = await this.FindLugarAsync(idlugar);
+            lugar.IdLugar = idlugar;
+            lugar.Nombre = nombre;
+            lugar.Descripcion = descripcion;
+            lugar.Ubicacion = ubicacion;
+            lugar.Categoria = categoria;
+            lugar.Horario = horario;
+            lugar.Imagen = imagen;
+            lugar.Tipo = tipo;
+            lugar.IdUsuario = idusuario;
 
-            if (lugar != null)
-            {
-                lugar.Nombre = nombre;
-                lugar.Descripcion = descripcion;
-                lugar.Ubicacion = ubicacion;
-                lugar.Categoria = categoria;
-                lugar.Horario = horario;
-                lugar.Imagen = imagen;
-                lugar.Tipo = tipo;
-
-                await _context.SaveChangesAsync();
-            }
+            await this.context.SaveChangesAsync();
         }
 
-        public async Task DeleteLugarAsync(int idLugar)
+        public async Task DeleteLugarAsync(int idlugar)
         {
-            // Buscar el lugar
-            Lugar lugar = await _context.Lugares.FirstOrDefaultAsync(l => l.IdLugar == idLugar);
 
-            if (lugar != null)
-            {
-                // Eliminar los comentarios asociados a este lugar
-                var comentarios = await _context.Comentarios
-                    .Where(c => c.IdLugar == idLugar)
-                    .ToListAsync();
-
-                if (comentarios.Any())
-                {
-                    _context.Comentarios.RemoveRange(comentarios);
-                }
-
-                // Eliminar el lugar
-                _context.Lugares.Remove(lugar);
-
-                // Guardar cambios en la base de datos
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        // Obtener lugares favoritos de un usuario
-        public async Task<List<LugarFavorito>> GetFavoritosLugarAsync(int idUsuario)
-        {
-            string sql = "EXEC SP_FAVORITOS_BY_USUARIO @idusuario";
-            var favoritos = await _context.LugaresFavoritos
-                .FromSqlRaw(sql, new SqlParameter("@idusuario", idUsuario))
+            var favoritos = await this.context.LugaresFavoritos
+                .Where(f => f.IdLugar == idlugar)
                 .ToListAsync();
-
-            return favoritos;
-        }
-
-        // Verificar si un lugar está en los favoritos de un usuario
-        public async Task<bool> ExisteFavoritoAsync(int idUsuario, int idLugar)
-        {
-            var favorito = await _context.LugaresFavoritos
-                .FirstOrDefaultAsync(f => f.IdUsuario == idUsuario && f.IdLugar == idLugar);
-
-            return favorito != null;
-        }
-
-        // Agregar un lugar a los favoritos
-        public async Task AddFavoritoAsync(int idUsuario, int idLugar, DateTime fecha, string imagen, string nombre, string descripcion, string ubicacion, string tipo)
-        {
-            LugarFavorito favorito = new LugarFavorito
-            {
-                IdUsuario = idUsuario,
-                IdLugar = idLugar,
-                FechaDeVisitaLugar = fecha,
-                ImagenLugar = imagen,
-                NombreLugar = nombre,
-                DescripcionLugar = descripcion,
-                UbicacionLugar = ubicacion,
-                TipoLugar = tipo
-            };
-
-            await _context.LugaresFavoritos.AddAsync(favorito);
-            await _context.SaveChangesAsync();
-        }
+                this.context.LugaresFavoritos.RemoveRange(favoritos);
+            await this.context.SaveChangesAsync();
 
 
-        // Eliminar un lugar de los favoritos
-        public async Task DeleteFavoritoAsync(int idUsuario, int idLugar)
-        {
-            LugarFavorito favorito = await _context.LugaresFavoritos
-                .FirstOrDefaultAsync(f => f.IdUsuario == idUsuario && f.IdLugar == idLugar);
-
-            if (favorito != null)
-            {
-                _context.LugaresFavoritos.Remove(favorito);
-                await _context.SaveChangesAsync();
-            }
-        }
+            var comentarios = await this.context.Comentarios
+                .Where(c => c.IdLugar == idlugar)
+                .ToListAsync();
+           
+                this.context.Comentarios.RemoveRange(comentarios);
+            await this.context.SaveChangesAsync();
 
 
-        // Obtener los comentarios de un lugar
-        public async Task<List<Comentario>> GetComentariosLugarAsync(int idLugar)
-        {
-            string sql = "EXEC SP_GET_COMENTARIOS_LUGAR @idLugar";
-
-            var consulta = _context.Comentarios
-                .FromSqlRaw(sql, new SqlParameter("@idLugar", idLugar));
-
-            return await consulta.ToListAsync();
-        }
-
-        // Agregar un comentario a un lugar
-        public async Task AddComentarioAsync(int idLugar, int idUsuario, string comentario)
-        {
-            Comentario nuevoComentario = new Comentario
-            {
-                IdLugar = idLugar,
-                IdUsuario = idUsuario,
-                Comentarios = comentario,
-                FechaComentario = DateTime.Now // Suponiendo que la fecha es la actual
-            };
-
-            await _context.Comentarios.AddAsync(nuevoComentario);
-            await _context.SaveChangesAsync();
-        }
-
-
-        // Eliminar un comentario
-        public async Task DeleteComentarioAsync(int idComentario)
-        {
-            Comentario comentario = await _context.Comentarios.FirstOrDefaultAsync(c => c.IdComentario == idComentario);
-
-            if (comentario != null)
-            {
-                _context.Comentarios.Remove(comentario);
-                await _context.SaveChangesAsync();
-            }
+            Lugar lugar = await this.FindLugarAsync(idlugar);
+            this.context.Lugares.Remove(lugar);
+            await this.context.SaveChangesAsync();
         }
 
     }
