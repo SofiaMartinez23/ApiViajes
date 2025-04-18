@@ -43,6 +43,26 @@ namespace ApiViajes.Repositories
                 .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
         }
 
+        public async Task InsertUsuarioAsync(int idUsuario, string nombre, string email,
+          int edad, string nacionalidad, string preferenciaviaje, string clave, string confirmarclave, string imagen)
+        {
+            UsuarioCompletoView user = new UsuarioCompletoView();
+            user.IdUsuario = idUsuario;
+            user.Nombre = nombre;
+            user.Email = email;
+            user.Edad = edad;
+            user.Nacionalidad = nacionalidad;
+            user.PreferenciaViaje = preferenciaviaje;
+            user.Clave = clave;
+            user.ConfirmarClave = confirmarclave;
+            user.AvatarUrl = imagen;
+            user.FechaRefistro = DateTime.Now;
+
+
+            await this.context.UsuarioCompletoViews.AddAsync(user);
+            await this.context.SaveChangesAsync();
+        }
+
         public async Task UpdateUsuarioAsync(int idUsuario, string nombre, string email, int edad, string nacionalida,
             string preferencia, string clave, string configuracionclave, string avatarurl)
         {
@@ -56,6 +76,7 @@ namespace ApiViajes.Repositories
             usuario.Clave = clave;
             usuario.ConfirmarClave = configuracionclave;
             usuario.AvatarUrl = avatarurl;
+            usuario.FechaRefistro = DateTime.Now;
 
             await this.context.SaveChangesAsync();
 

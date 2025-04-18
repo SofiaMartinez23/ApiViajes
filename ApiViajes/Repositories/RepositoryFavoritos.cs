@@ -18,10 +18,13 @@ namespace ApiViajes.Repositories
             return await this.context.LugaresFavoritos.ToListAsync();
         }
 
-        public async Task<LugarFavorito> FindFavoritosLugarAsync(int idUsuario)
+        public async Task<List<LugarFavorito>> FindFavoritosLugarAsync(int idUsuario)
         {
-            return await this.context.LugaresFavoritos.FirstOrDefaultAsync(x => x.IdUsuario == idUsuario);
+            return await this.context.LugaresFavoritos
+                .Where(x => x.IdUsuario == idUsuario)
+                .ToListAsync();
         }
+
 
         public async Task<bool> ExisteFavoritoAsync(int idUsuario, int idLugar)
         {

@@ -19,15 +19,22 @@ namespace ApiViajes.Repositories
         {
             return await this.context.Comentarios.ToListAsync();
         }
-
-        public async Task<Comentario> FindComentariosLugarAsync(int idLugar)
+        public async Task<List<Comentario>> GetComentariosByLugarAsync(int idLugar)
         {
-            return await this.context.Comentarios.FirstOrDefaultAsync(x => x.IdLugar == idLugar);
+            return await this.context.Comentarios
+                .Where(x => x.IdLugar == idLugar)
+                .ToListAsync();
         }
 
-        public async Task InsertComentarioAsync(int idLugar, int idUsuario, string comentario, string nombreusuario)
+        public async Task<Comentario> FindComentariosAsync(int idComentario)
+        {
+            return await this.context.Comentarios.FirstOrDefaultAsync(x => x.IdComentario == idComentario);
+        }
+
+        public async Task InsertComentarioAsync(int idComentario, int idLugar, int idUsuario, string comentario, string nombreusuario)
         {
             Comentario coment = new Comentario();
+            coment.IdComentario = idComentario;
             coment.IdLugar = idLugar;
             coment.IdUsuario = idUsuario;
             coment.Comentarios = comentario;
@@ -42,7 +49,7 @@ namespace ApiViajes.Repositories
         public async Task UpdateComentarioAsync(int idComentario, int idLugar,
           int idUsuario, string comentario, string nombreusuario)
         {
-            Comentario coment = await this.FindComentariosLugarAsync(idLugar);
+            Comentario coment = await this.FindComentariosAsync(idComentario);
             coment.IdComentario = idComentario;
             coment.IdLugar = idLugar;
             coment.IdUsuario = idUsuario;
@@ -53,9 +60,9 @@ namespace ApiViajes.Repositories
             await this.context.SaveChangesAsync();
         }
 
-        public async Task DeleteComentarioAsync(int idLugar)
+        public async Task DeleteComentarioAsync(int idComentario)
         {
-            Comentario coment = await this.FindComentariosLugarAsync(idLugar);
+            Comentario coment = await this.FindComentariosAsync(idComentario);
             this.context.Comentarios.Remove(coment);
             await this.context.SaveChangesAsync();
         }

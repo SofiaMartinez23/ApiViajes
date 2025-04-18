@@ -29,7 +29,7 @@ namespace ApiViajes.Controllers
 
         [HttpGet("{idUsuario}")]
         [Authorize]
-        public async Task<ActionResult<LugarFavorito>> FindLugarFavorito(int idUsuario)
+        public async Task<ActionResult<List<LugarFavorito>>> FindLugarFavorito(int idUsuario)
         {
             return await this.repo.FindFavoritosLugarAsync(idUsuario);
         }

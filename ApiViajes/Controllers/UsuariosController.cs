@@ -22,7 +22,6 @@ namespace ApiViajes.Controllers
             this.helper = helper;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<List<UsuarioCompletoView>>> GetUsuarios()
         {
@@ -53,6 +52,17 @@ namespace ApiViajes.Controllers
             return userModel;
         }
 
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<ActionResult> InsertUsuario(UsuarioCompletoView user)
+        {
+            await this.repo.InsertUsuarioAsync
+                (user.IdUsuario, user.Nombre, user.Email, user.Edad,
+                user.Nacionalidad, user.PreferenciaViaje, user.Clave,
+                user.ConfirmarClave, user.AvatarUrl);
+            return Ok();
+        }
+
         [Authorize]
         [HttpPut]
         [Route("[action]/{idUsuario}")]
@@ -65,5 +75,6 @@ namespace ApiViajes.Controllers
             return Ok();
         }
 
+       
     }
 }
